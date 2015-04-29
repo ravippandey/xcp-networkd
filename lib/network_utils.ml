@@ -33,6 +33,7 @@ let modprobe = "/sbin/modprobe"
 let ethtool = ref "/sbin/ethtool"
 let bonding_dir = "/proc/net/bonding/"
 let dhcp6c = "/sbin/dhcp6c"
+let dcbtool = ref "/usr/sbin/dcbtool"
 
 let call_script ?(log_successful_output=false) script args =
 	try
@@ -939,6 +940,20 @@ module Ethtool = struct
 	let set_offload name options =
 		if options <> [] then
 			ignore (call ~log:true ("-K" :: name :: (List.concat (List.map (fun (k, v) -> [k; v]) options))))
+end
+
+module Dcbtool = struct
+	let call ?(log=false) args =
+		call_script ~log_successful_output:log !dcbtool args
+
+	let set_dcb name value =
+		call ~log:true ("sc" :: name :: "dcb" :: [value] )
+
+	let set_fcoe name value =
+		ignore (call ~log:true ("sc" :: name :: "app:fcoe" :: [value]))
+
+	let set_pfc name options = 
+		ignore (call ~log:true ("sc" :: name :: "pfc" :: (List.concat (List.map (fun (k, v) -> ["k:v"]) options))))
 end
 
 module Bindings = struct

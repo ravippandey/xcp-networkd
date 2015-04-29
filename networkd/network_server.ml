@@ -317,6 +317,33 @@ module Interface = struct
 			Ethtool.set_offload name params
 		) ()
 
+	let set_fcoe _ dbg ~name ~param =
+		Debug.with_thread_associated dbg (fun () ->
+			debug "Setting fcoe to %s for %s" param name;
+			Dcbtool.set_fcoe name param
+		) ()
+
+	let set_dcb _ dbg ~name ~param =
+		Debug.with_thread_associated dbg (fun () ->
+			debug "Setting dcb to %s for %s" param name;
+			Dcbtool.set_dcb name param
+		) ()
+
+	let set_pfc _ dbg ~name ~params =
+		Debug.with_thread_associated dbg (fun () ->
+			debug "Setting pfc to %s for %s"
+			(String.concat ", " (List.map (fun (k, v) -> k ^ "=" ^ v) params)) name;
+			Dcbtool.set_pfc name params
+		) ()
+
+	let is_fcoe_supported _ dbg ~name =
+		Debug.with_thread_associated dbg (fun () ->
+			let output = Dcbtool.set_dcb name "on" in
+			debug "output: %s" output;
+			false
+		) ()
+
+
 	let is_connected _ dbg ~name =
 		Debug.with_thread_associated dbg (fun () ->
 			Sysfs.get_carrier name
